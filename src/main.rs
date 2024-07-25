@@ -9,7 +9,7 @@ type Id = usize;
 
 #[derive(Default)]
 struct Ui {
-    list_curr: Option<usize>,
+    list_curr: Option<Id>,
     row: usize,
     col: usize,
 }
@@ -25,18 +25,19 @@ impl Ui {
         self.list_curr = Some(id);
     }
 
-    fn list_element(&mut self, label: &str, id: Id) {
+    fn list_element(&mut self, label: &str, id: Id) -> bool {
         let id_curr = self
             .list_curr
             .expect("Not Allowed to create list elements outside of list");
 
-        self.label(&format!("- [] {}", label), {
+        self.label(label, {
             if id_curr == id {
                 HIGHLIGHT_PAIR
             } else {
                 REGULER_PAIR
             }
         });
+        return false;
     }
 
     fn label(&mut self, text: &str, pair: i16) {
@@ -71,6 +72,7 @@ fn main() {
         "write todo app".to_string(),
         "sleep".to_string(),
         "repeat again!".to_string(),
+        "coding rust is horiabel!".to_string(),
     ];
 
     let mut dones: Vec<String> = vec![
@@ -80,12 +82,13 @@ fn main() {
 
     let mut ui = Ui::default();
     while !quit {
+        erase();
         ui.begin(0, 0);
         {
             ui.label("TODO:", REGULER_PAIR);
             ui.begin_list(todo_curr);
             for (index, todo) in todos.iter().enumerate() {
-                ui.list_element(todo, index)
+                ui.list_element(&format!(" - [ ] {}", todo), index);
             }
             ui.end_list();
 
@@ -93,7 +96,7 @@ fn main() {
             ui.label("DONE:", REGULER_PAIR);
             ui.begin_list(done_curr);
             for (index, done) in dones.iter().enumerate() {
-                ui.list_element(&done, index)
+                ui.list_element(&format!("- [x] {}", &done), index + 1);
             }
             ui.end_list();
         }
@@ -109,7 +112,16 @@ fn main() {
                     todo_curr -= 1
                 }
             }
-            'j' => todo_curr = min(todo_curr + 1, todos.len() - 1),
+            'j' => {
+                if todo_curr + 1 < todos.len() {
+                    todo_curr += 1;
+                }
+            }
+            '\n' => {
+                if (todo_curr < todos.len()) {
+                    dones.push(todos.remove(todo_curr));
+                }
+            }
             _ => {}
         }
     }
