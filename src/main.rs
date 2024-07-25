@@ -30,18 +30,13 @@ impl Ui {
             .list_curr
             .expect("Not Allowed to create list elements outside of list");
 
-        self.label(label, {
+        self.label(&format!("- [] {}", label), {
             if id_curr == id {
                 HIGHLIGHT_PAIR
             } else {
                 REGULER_PAIR
             }
         });
-        // render in a  different style
-        // attron(COLOR_PAIR(pair));
-        // mv(id as i32, 1);
-        // addstr(*todo);
-        // attroff(COLOR_PAIR(pair));
     }
 
     fn label(&mut self, text: &str, pair: i16) {
@@ -70,7 +65,6 @@ fn main() {
     let mut quit = false;
 
     let mut todo_curr: usize = 0;
-    let dones = Vec::<String>::new();
     let mut done_curr: usize = 0;
 
     let mut todos: Vec<String> = vec![
@@ -78,17 +72,25 @@ fn main() {
         "sleep".to_string(),
         "repeat again!".to_string(),
     ];
+
+    let mut dones: Vec<String> = vec![
+        "started coding rust".to_string(),
+        "started hate rust".to_string(),
+    ];
+
     let mut ui = Ui::default();
     while !quit {
         ui.begin(0, 0);
         {
+            ui.label("TODO:", REGULER_PAIR);
             ui.begin_list(todo_curr);
             for (index, todo) in todos.iter().enumerate() {
                 ui.list_element(todo, index)
             }
             ui.end_list();
 
-            ui.label("-#--#--#--#-#--#-#--#--#", REGULER_PAIR);
+            ui.label("--------------------------------", REGULER_PAIR);
+            ui.label("DONE:", REGULER_PAIR);
             ui.begin_list(done_curr);
             for (index, done) in dones.iter().enumerate() {
                 ui.list_element(&done, index)
